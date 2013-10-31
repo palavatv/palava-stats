@@ -171,7 +171,8 @@ MongoClient.connect 'mongodb://localhost/plv_stats', (err, db) =>
     () ->
       times = {}
       for key, value of @connection_time
-        times[key] = parseInt(value)
+        if key >= min_time and key < max_time
+          times[key] = parseInt(value)
       emit(adjust_time(@c_at), times)
     # reduce
     add_objects
@@ -181,7 +182,8 @@ MongoClient.connect 'mongodb://localhost/plv_stats', (err, db) =>
     () ->
       peaks = {}
       for key, value of @room_peaks
-        peaks[key] = parseInt(value)
+        if key >= min_peak and key < max_peak
+          peaks[key] = parseInt(value)
       emit(adjust_time(@c_at), peaks)
     # reduce
     add_objects

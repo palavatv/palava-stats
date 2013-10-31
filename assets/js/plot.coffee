@@ -19,10 +19,23 @@
 ###############################################################################
 
 $ () =>
+  timed_array = (object) =>
+    array = []
+
+    for time, count of object
+      array.push([time * 1000, count])
+
+    return array
+
+  dateFormatter = (v) => new Date(v).toLocaleDateString()
+
   modes =
     "User Count":
       url: "/stats/count_users.json"
       unit: "users/day"
+      convert: timed_array
+      mode: 'time'
+      toolFormat: dateFormatter
       options:
         min_time:
           name: "Minimum Minutes"
@@ -42,6 +55,9 @@ $ () =>
     "Room Count":
       url: "/stats/count_rooms.json"
       unit: "rooms/day"
+      convert: timed_array
+      mode: 'time'
+      toolFormat: dateFormatter
       options:
         min_peak:
           name: "Minimum Participants"
@@ -57,6 +73,100 @@ $ () =>
         scale_shift:
           value: 60*60
           static: true
+
+    "User Time Spent":
+      url: "/stats/user_times.json"
+      unit: "user(s)"
+      bars: true
+      convert: (raw) =>
+        if not raw[0]?
+          return []
+
+        ranges = {}
+
+        for time, amount of raw[0]
+          if time == '0'
+            key = -1
+          else
+            key = Math.floor(Math.log(time)/Math.LN2)
+
+          if ranges[key]?
+            ranges[key] += amount
+          else
+            ranges[key] = amount
+
+        console.log ranges
+
+        array = []
+
+        for range, amount of ranges
+          array.push([range, amount])
+
+        console.log(array)
+
+        return array
+      tickFormat: (v) =>
+        if v == -1
+          return 0
+        else
+          Math.pow(2, v)
+      toolFormat: (v) =>
+        if v == -1
+          return "0 minutes"
+        else if v == 0
+          return "1 minute"
+        else
+          from = Math.pow(2, v)
+          to = Math.pow(2, v + 1) - 1
+          return from + " to " + to + " minutes"
+      options:
+        steps:
+          value: "[0]"
+          static: true
+        min_time:
+          name: "Minimum Minutes"
+          value: 1
+          active: true
+        start:
+          name: "Start of timespan (timestamp)"
+          value: new Date().getTime() / 1000 - 60*60*24*7
+          active: false
+        end:
+          name: "End of timespan (timestamp)"
+          value: new Date().getTime() / 1000
+          active: false
+
+    "Room Peaks":
+      url: "/stats/room_peaks.json"
+      unit: "room(s)"
+      bars: true
+      convert: (raw) =>
+        if not raw[0]?
+          return []
+
+        array = []
+
+        for peak, amount of raw[0]
+          array.push([peak, amount])
+
+        return array
+      toolFormat: (v) => v + " peak user(s)"
+      options:
+        steps:
+          value: "[0]"
+          static: true
+        min_peak:
+          name: "Minimum Peak"
+          value: 2
+          active: true
+        start:
+          name: "Start of timespan (timestamp)"
+          value: new Date().getTime() / 1000 - 60*60*24*7
+          active: false
+        end:
+          name: "End of timespan (timestamp)"
+          value: new Date().getTime() / 1000
+          active: false
 
   heading = (text) => $('#heading').text(text)
 
@@ -111,28 +221,35 @@ $ () =>
           if spec.static
             params[option] = spec.value
           else
-            input = $('input[name=' + option + ']')
+            input = form.find('input[name=' + option + ']')
 
             if not input.prop 'disabled'
+              console.log 'adding ' + option
               params[option] = input.val()
 
         $.getJSON data.url, params, (raw_data) =>
           submit.prop 'disabled', false
           heading name
 
-          array = []
-
-          for time, count of raw_data
-            array.push([time * 1000, count])
+          array = data.convert raw_data
 
           options =
             xaxis:
               tickLength: 5
-              mode: "time"
+              mode: data.mode
+              tickFormatter: data.tickFormat
             grid:
               hoverable: true
 
-          $.plot $("#placeholder"), [{data: array, lines: { show: true}}], options
+          data_source =
+            data: array
+
+          if data.bars
+            data_source.bars = { show: true }
+          else
+            data_source.lines = { show: true }
+
+          $.plot $("#placeholder"), [data_source], options
 
           last_tooltip = undefined
 
@@ -145,13 +262,16 @@ $ () =>
 
                 tooltip = $('<div id="tooltip">')
                 tooltip.css 'left', item.pageX + 5
-                tooltip.css 'top', item.pageY + 5
+                tooltip.css 'top', item.pageY - 5
 
-                date = new Date item.datapoint[0]
+                toolFormat = data.toolFormat ? (v) => v
+                label_text = toolFormat item.datapoint[0]
 
                 label = $('<div id="date">')
-                label.text date.toLocaleDateString() + ":"
+                label.text  label_text + ":"
                 tooltip.append label
+
+                console.log item
 
                 value = $('<div id="value">')
                 value.text item.datapoint[1] + " " + data.unit
