@@ -68,6 +68,7 @@ MongoClient.connect 'mongodb://localhost/plv_stats', (err, db) =>
           return
 
       scope.scale = get_int('scale', 0)
+      scope.scale_shift = get_int('scale_shift', 0)
 
       scope.min_time = get_int('min_time', 0)
       scope.max_time = get_int('max_time', Number.MAX_VALUE)
@@ -80,7 +81,7 @@ MongoClient.connect 'mongodb://localhost/plv_stats', (err, db) =>
       scope.adjust_time = (time) =>
         if scale
           # very simple time frame based on modulo
-          return time - time % scale
+          return time - (time + scale_shift) % scale
         else if steps?
           # user defined steps (plus start as implicit step)
           last = start
