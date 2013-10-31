@@ -271,8 +271,6 @@ $ () =>
                 label.text  label_text + ":"
                 tooltip.append label
 
-                console.log item
-
                 value = $('<div id="value">')
                 value.text item.datapoint[1] + " " + data.unit
                 tooltip.append value
