@@ -32,6 +32,13 @@ $ () =>
           name: "Maximum Minutes"
           value: 10
           active: false
+        scale:
+          value: 60*60*24
+          static: true
+        scale_shift:
+          value: 60*60
+          static: true
+
     "Room Count":
       url: "/stats/count_rooms.json"
       unit: "rooms/day"
@@ -44,6 +51,12 @@ $ () =>
           name: "Maximum Participants"
           value: 5
           active: false
+        scale:
+          value: 60*60*24
+          static: true
+        scale_shift:
+          value: 60*60
+          static: true
 
   heading = (text) => $('#heading').text(text)
 
@@ -61,6 +74,9 @@ $ () =>
     content.append(form)
 
     $.each data.options, (option, data) =>
+      if data.static
+        return
+
       item = $('<div class="item">')
 
       label = $('<span class="label">')
@@ -89,15 +105,16 @@ $ () =>
       try
         submit.prop 'disabled', true
 
-        params =
-          scale: 60*60*24
-          scale_shift: 3600
+        params = {}
 
-        for option, _ of data.options
-          input = $('input[name=' + option + ']')
+        for option, spec of data.options
+          if spec.static
+            params[option] = spec.value
+          else
+            input = $('input[name=' + option + ']')
 
-          if not input.prop 'disabled'
-            params[option] = input.val()
+            if not input.prop 'disabled'
+              params[option] = input.val()
 
         $.getJSON data.url, params, (raw_data) =>
           submit.prop 'disabled', false
@@ -135,8 +152,6 @@ $ () =>
                 label = $('<div id="date">')
                 label.text date.toLocaleDateString() + ":"
                 tooltip.append label
-
-                console.log item
 
                 value = $('<div id="value">')
                 value.text item.datapoint[1] + " " + data.unit
