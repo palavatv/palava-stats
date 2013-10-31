@@ -20,7 +20,19 @@
 ###############################################################################
 
 MongoClient = require('mongodb').MongoClient
-app = require('express')()
+express = require('express')
+connect = require('connect')
+
+app = express()
+
+app.configure () =>
+  app.set 'views', __dirname + '/views'
+  app.use require('connect-assets')()
+  app.use connect.static __dirname + '/public'
+  app.use connect.static __dirname + '/support/public'
+
+app.get '/', (req, res) =>
+  res.render 'index.jade'
 
 MongoClient.connect 'mongodb://localhost/plv_stats', (err, db) =>
   if err then throw err

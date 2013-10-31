@@ -1,3 +1,4 @@
 *.swp
 dynamic
 support/public
+node_modules

@@ -8,9 +8,10 @@ msg() {
 
 flot() {
 	msg "Setting up flot ..."
+	mkdir -p support/public/js/
 	cd support/flot
 	make
-	cp *.min.* ../public/
+	cp *.min.* ../public/js/
 }
 
 msg "Initializing git submodules ..."

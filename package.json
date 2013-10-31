@@ -4,7 +4,12 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
+        "mongodb": "1.*",
         "express": "3.x",
-        "mongodb": "1.*"
+        "connect": "",
+        "jade": "",
+        "stylus": "",
+        "coffee-script": "",
+        "connect-assets": ""
     }
 }
