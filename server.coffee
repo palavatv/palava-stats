@@ -27,12 +27,14 @@ MongoClient.connect 'mongodb://localhost/plv_stats', (err, db) =>
 
   coll = db.collection 'rtc'
 
-  # stat helper
+  # abstraction for mapReduce page calls
 
   add_map_reduce_stat = (name, map, reduce) =>
     path = '/stats/' + name + '.json'
 
     page_fun = (req, res) =>
+      # fetch various options from the request
+
       get_int = (key, fallback) =>
         if req.param(key)?
           return parseInt(req.param(key))
@@ -61,16 +63,24 @@ MongoClient.connect 'mongodb://localhost/plv_stats', (err, db) =>
       scope.min_peak = get_int('min_peak', 0)
       scope.max_peak = get_int('max_peak', Number.MAX_VALUE)
 
+      # function to assign times to a time frame
+
       scope.adjust_time = (time) =>
         if scale
+          # very simple time frame based on modulo
           return time - time % scale
         else if steps?
+          # user defined steps (plus start as implicit step)
           last = start
           for step in steps
             if step <= time
               return step
+          return last
         else
+          # no steps, return every single event
           return time
+
+      # prepare options for mapReduce
 
       options =
         out:
@@ -81,17 +91,26 @@ MongoClient.connect 'mongodb://localhost/plv_stats', (err, db) =>
             $gte: start,
             $lt: end,
 
+      # finally call mapReduce ...
+
       coll.mapReduce map, reduce, options, (err, result) =>
+        # this should not happen
         if err
           res.send({error: err})
           return
+
+        # transform array into object
 
         data = {}
 
         for item in result
           data[item._id] = item.value
 
+        # finished, send to user
+
         res.send data
+
+    # callable as post and get
 
     app.get path, page_fun
     app.post path, page_fun
