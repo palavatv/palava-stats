@@ -19,6 +19,12 @@
 #
 ###############################################################################
 
+BIND_PORT = process.env.BIND_PORT ? 3000
+BIND_HOST = process.env.BIND_HOST ? "0.0.0.0"
+
+MONGO_HOST = process.env.MONGO_HOST ? "localhost"
+MONGO_DB = process.env.MONGO_DB ? "plv_stats"
+
 MongoClient = require('mongodb').MongoClient
 express = require('express')
 connect = require('connect')
@@ -34,7 +40,9 @@ app.configure () =>
 app.get '/', (req, res) =>
   res.render 'index.jade'
 
-MongoClient.connect 'mongodb://localhost/plv_stats', (err, db) =>
+mongo_url = "mongodb://" + MONGO_HOST + "/" + MONGO_DB
+
+MongoClient.connect mongo_url, (err, db) =>
   if err then throw err
 
   coll = db.collection 'rtc'
@@ -188,6 +196,6 @@ MongoClient.connect 'mongodb://localhost/plv_stats', (err, db) =>
     # reduce
     add_objects
 
-  console.log "Ready for action"
+  console.log "Listening on " + BIND_HOST + ":" + BIND_PORT
 
-  app.listen(3000)
+  app.listen(BIND_PORT, BIND_HOST)
