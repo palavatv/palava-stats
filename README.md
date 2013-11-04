@@ -54,8 +54,8 @@ rooms times will be counted each time.
 
 A sample of the collected data might look like this
 
-	connection_time": { "0": 1, "5": "2", "7": 1 },
-	"room_peaks": { "1": "1", "3": "1" }
+	connection_time": { "0": 1, "5": 2, "7": 1 },
+	"room_peaks": { "1": 1, "3": 1 }
 
 That means there was one user staying 0 minutes (under 1 minute), two users
 staying 5 minutes and one user staying 7 minutes. They used two rooms, one with
