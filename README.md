@@ -65,3 +65,12 @@ Room stats and user stats will not always add up that easily. Users might
 leave the room and later be replaced by another user, which will not increase
 the maximum size reached in this room.
 
+## TODOs
+
+* make the interface useable
+* add design
+* ability to zoom into graphs
+* add more graphs
+	* punch cards
+	* ..
+
