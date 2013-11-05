@@ -8,6 +8,13 @@ web interface.
 
 ## Usage
 
+There are the following dependencies
+
+* node (tested with node 0.10)
+* npm
+* git
+* yui-compressor (used by flot)
+
 Install with the following commands
 
 	# initialize support (submodules, build, ...)
