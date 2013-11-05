@@ -4,7 +4,7 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
-        "mongodb": "1.*",
+        "mongodb": "",
         "express": "3.x",
         "connect": "",
         "jade": "",
