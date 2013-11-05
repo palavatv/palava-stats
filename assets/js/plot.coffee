@@ -31,11 +31,12 @@ $ () =>
 
   modes =
     "User Count":
+      desc: "The amount of users visiting rooms for each day"
       url: "/stats/count_users.json"
       unit: "users/day"
       convert: timed_array
       mode: 'time'
-      toolFormat: dateFormatter
+      toolYFormat: dateFormatter
       options:
         min_time:
           name: "Minimum Minutes"
@@ -53,11 +54,12 @@ $ () =>
           static: true
 
     "Room Count":
+      desc: "The amount of rooms being created for each day"
       url: "/stats/count_rooms.json"
       unit: "rooms/day"
       convert: timed_array
       mode: 'time'
-      toolFormat: dateFormatter
+      toolYFormat: dateFormatter
       options:
         min_peak:
           name: "Minimum Participants"
@@ -75,6 +77,7 @@ $ () =>
           static: true
 
     "User Time Spent":
+      desc: "Overview over the amount time users spend in one room"
       url: "/stats/user_times.json"
       unit: "user(s)"
       bars: true
@@ -110,7 +113,7 @@ $ () =>
           return 0
         else
           Math.pow(2, v)
-      toolFormat: (v) =>
+      toolYFormat: (v) =>
         if v == -1
           return "0 minutes"
         else if v == 0
@@ -137,6 +140,7 @@ $ () =>
           active: false
 
     "Room Peaks":
+      desc: "Overview over the maximum number of users in a room"
       url: "/stats/room_peaks.json"
       unit: "room(s)"
       bars: true
@@ -150,7 +154,7 @@ $ () =>
           array.push([peak, amount])
 
         return array
-      toolFormat: (v) => v + " peak user(s)"
+      toolYFormat: (v) => v + " peak user(s)"
       options:
         steps:
           value: "[0]"
@@ -176,6 +180,10 @@ $ () =>
     caption = $('<h2>')
     caption.text(name)
     div.append(caption)
+
+    desc = $('<div class="description">')
+    desc.text(data.desc)
+    div.append(desc)
 
     content = $('<div class="content">')
     div.append(content)
@@ -264,15 +272,16 @@ $ () =>
                 tooltip.css 'left', item.pageX + 5
                 tooltip.css 'top', item.pageY - 5
 
-                toolFormat = data.toolFormat ? (v) => v
-                label_text = toolFormat item.datapoint[0]
+                toolYFormat = data.toolYFormat ? (v) => v
+                label_text = toolYFormat item.datapoint[0]
 
+                toolXFormat = data.toolXFormat ? (v) => v + " " + data.unit
                 label = $('<div id="date">')
                 label.text  label_text + ":"
                 tooltip.append label
 
                 value = $('<div id="value">')
-                value.text item.datapoint[1] + " " + data.unit
+                value.text toolXFormat item.datapoint[1]
                 tooltip.append value
 
                 $('html').append tooltip
