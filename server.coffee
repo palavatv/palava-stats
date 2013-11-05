@@ -174,6 +174,18 @@ MongoClient.connect mongo_url, (err, db) =>
     (key, values) ->
       return Array.sum(values)
 
+  add_map_reduce_stat 'count_time',
+    # map
+    () ->
+      count = 0
+      for time, amount of @connection_time
+        if time >= min_time and time < max_time
+          count += parseInt(time) * parseInt(amount)
+      emit(adjust_time(@c_at), count)
+    # reduce
+    (key, values) ->
+      return Array.sum(values)
+
   add_map_reduce_stat 'user_times',
     # map
     () ->

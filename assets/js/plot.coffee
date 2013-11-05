@@ -19,11 +19,15 @@
 ###############################################################################
 
 $ () =>
+  roundabout = (v, prec) =>
+    fact = Math.pow(10, prec)
+    return Math.round(v * fact) / fact
+
   timed_array = (object) =>
     array = []
 
-    for time, count of object
-      array.push([time * 1000, count])
+    for time, data of object
+      array.push([time * 1000, data])
 
     return array
 
@@ -69,6 +73,22 @@ $ () =>
           name: "Maximum Participants"
           value: 5
           active: false
+        scale:
+          value: 60*60*24
+          static: true
+        scale_shift:
+          value: 60*60
+          static: true
+
+    "Time Count":
+      desc: "The amount of time spent by users in rooms for each day"
+      url: "/stats/count_time.json"
+      convert: timed_array
+      mode: 'time'
+      toolYFormat: dateFormatter
+      toolXFormat: (v) =>
+        roundabout(v / 60, 2) + " hours/day"
+      options:
         scale:
           value: 60*60*24
           static: true
