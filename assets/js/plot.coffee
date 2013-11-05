@@ -89,6 +89,14 @@ $ () =>
       toolXFormat: (v) =>
         roundabout(v / 60, 2) + " hours/day"
       options:
+        min_time:
+          name: "Minimum Minutes"
+          value: 1
+          active: false
+        max_time:
+          name: "Maximum Minutes"
+          value: 200
+          active: true
         scale:
           value: 60*60*24
           static: true
