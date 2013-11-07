@@ -213,6 +213,9 @@ $ () =>
     desc.text(data.desc)
     div.append(desc)
 
+    placeholder = $('<div class="placeholder">')
+    div.append(placeholder)
+
     content = $('<div class="content">')
     div.append(content)
 
@@ -244,7 +247,7 @@ $ () =>
         input.prop 'disabled', !active.prop('checked')
       active.change()
 
-    submit = $('<input type="submit" value="Show Graph">')
+    submit = $('<input type="submit" value="Update Graph">')
     form.append(submit)
 
     form.submit () =>
@@ -285,11 +288,11 @@ $ () =>
           else
             data_source.lines = { show: true }
 
-          $.plot $("#placeholder"), [data_source], options
+          $.plot placeholder, [data_source], options
 
           last_tooltip = undefined
 
-          $("#placeholder").bind "plothover", (event, pos, item) =>
+          placeholder.bind "plothover", (event, pos, item) =>
             if item?
               if last_tooltip != item.dataIndex
                 $('#tooltip').remove()
@@ -322,7 +325,7 @@ $ () =>
 
       return false
 
-    $('#ui').append(div)
+    $('#graphs').append(div)
 
-  $('.mode:first form').submit()
+    form.submit()
 
