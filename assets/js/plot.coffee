@@ -33,6 +33,27 @@ $ () =>
 
   dateFormatter = (v) => new Date(v).toLocaleDateString()
 
+  weekendAreas = (axes) =>
+    markings = []
+
+    # last saturday
+    d = new Date(axes.xaxis.min)
+    d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 1) % 7))
+    d.setUTCSeconds(0)
+    d.setUTCMinutes(0)
+    d.setUTCHours(0)
+    i = d.getTime()
+
+    loop
+      markings.push { xaxis: { from: i, to: i + 2 * 24 * 60 * 60 * 1000 } }
+
+      i += 7 * 24 * 60 * 60 * 1000
+
+      if i >= axes.xaxis.max
+        break
+
+    return markings
+
   modes =
     "User Count":
       desc: "The amount of users visiting rooms for each day"
@@ -279,6 +300,9 @@ $ () =>
               tickFormatter: data.tickFormat
             grid:
               hoverable: true
+
+          if data.mode == 'time'
+            options.grid.markings = weekendAreas
 
           data_source =
             data: array
