@@ -23,11 +23,13 @@ BIND_PORT = process.env.BIND_PORT ? 3000
 BIND_HOST = process.env.BIND_HOST ? "0.0.0.0"
 
 MONGO_HOST = process.env.MONGO_HOST ? "localhost"
-MONGO_DB = process.env.MONGO_DB ? "plv_stats"
+MONGO_STATS_DB = process.env.MONGO_DB ? "plv_stats"
+MONGO_HQ_DB = process.env.MONGO_DB ? "plv_hq"
 
 MongoClient = require('mongodb').MongoClient
 express = require('express')
 connect = require('connect')
+async = require('async')
 
 app = express()
 
@@ -40,12 +42,15 @@ app.configure () =>
 app.get '/', (req, res) =>
   res.render 'index.jade'
 
-mongo_url = "mongodb://" + MONGO_HOST + "/" + MONGO_DB
+stats_url = "mongodb://" + MONGO_HOST + "/" + MONGO_STATS_DB
+hq_url = "mongodb://" + MONGO_HOST + "/" + MONGO_HQ_DB
 
-MongoClient.connect mongo_url, (err, db) =>
+async.map [stats_url, hq_url], MongoClient.connect.bind(MongoClient), (err, dbs) =>
   if err then throw err
 
-  coll = db.collection 'rtc'
+  [stats_db, hq_db] = dbs
+
+  coll = stats_db.collection 'rtc'
 
   # abstraction for mapReduce page calls
 
@@ -207,6 +212,19 @@ MongoClient.connect mongo_url, (err, db) =>
       emit(adjust_time(@c_at), peaks)
     # reduce
     add_objects
+
+  # feedback entries
+
+  feedback_coll = hq_db.collection 'feedback_entries'
+
+  app.get '/feedback', (req, res) =>
+    feedback_coll.find().toArray (err, feedback) =>
+      if err then throw err
+
+      for entry in feedback
+        entry.text = entry.text.replace('\n', '<br>')
+
+      res.render 'feedback.jade', { entries: feedback }
 
   console.log "Listening on " + BIND_HOST + ":" + BIND_PORT
 

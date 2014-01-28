@@ -40,7 +40,8 @@ The following variables are available
 * `BIND_PORT`: port on which the webinterface listens (default: 3000)
 * `BIND_HOST`: host on which the webinterface binds (default: 0.0.0.0)
 * `MONGO_HOST`: address of the mongodb server (default: localhost)
-* `MONGO_DB`: database in which the data is stored (default: plv\_stats)
+* `MONGO_STATS_DB`: database in which the statistical data is stored (default: `plv_stats`)
+* `MONGO_HQ_DB`: database in which the feedback data is stored (default: `plv_hq`)
 
 ## Collected Data
 
