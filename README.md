@@ -82,3 +82,6 @@ the maximum size reached in this room.
 	* punch cards
 	* ..
 
+## Issues
+
+Please report issues to the [palava Repository](https://github.com/palavatv/palava/issues).
